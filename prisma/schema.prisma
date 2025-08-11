@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  role         Role
+  passwordHash String
+  createdAt    DateTime @default(now())
+  serviceInquiryHandled ServiceInquiry[]
+  planHandled   Plan[]
+  hardwareInquiryHandled  HardwareInquiry[]
+}
+
+model HardwareInquiry {
+  id                String          @id @default(uuid())
+  customerName      String
+  customerEmail     String
+  customerPhone     String
+  productId         String
+  quantity          Int
+  message           String
+  status            InquiryStatus   @default(new)
+  handledBy         AdminUser?   @relation(fields: [handledById], references: [id])
+  handledById       String?
+  isHandled Boolean @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  hardwareProduct   HardwareProduct @relation(fields: [productId], references: [id])
+}
+
+model HardwareProduct {
+  id              String            @id @default(uuid())
+  name            String
+  description     String
+  categoryId      String
+  category        HardwareCategory  @relation(fields: [categoryId], references: [id])
+  price           Float?
+  stock           Int?
+  isActive        Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  hardwareInquiry HardwareInquiry[]
+} 
+
+model HardwareCategory {
+  id        String           @id @default(uuid())
+  name      String           @unique
+  products  HardwareProduct[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+model ServiceInquiry {
+  id                String         @id @default(uuid())
+  customerName      String
+  customerEmail     String
+  customerPhone     String?
+  productId         String
+  selectedPlanId    String?
+  message           String
+  status            InquiryStatus  @default(new)
+  handledBy         AdminUser?   @relation(fields: [handledById], references: [id])
+  handledById       String?
+  isHandled Boolean @default(false)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  serviceProduct    ServiceProduct @relation(fields: [productId], references: [id])
+  Plan              Plan?          @relation(fields: [selectedPlanId], references: [id])
+}
+
+model Plan {
+  id               String         @id @default(uuid())
+  productId        String
+  name             String
+  type             PlanType
+  priceMonthly     Float?
+  priceOneTime     Float?
+  features         String[]
+  contractDuration Int?
+  isActive         Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  Inquiry          ServiceInquiry[]
+  isHandled        Boolean @default(false)
+  handledBy        AdminUser?   @relation(fields: [handledById], references: [id])
+  handledById  String?
+  serviceProduct   ServiceProduct @relation(fields: [productId], references: [id])
+}
+
+model ServiceProduct {
+  id          String    @id @default(uuid())
+  name        String
+  description String
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  inquiry     ServiceInquiry[]
+  Plan        Plan[]
+}
+
+enum InquiryStatus {
+  new
+  contacted
+  qualified
+  closed
+  rejected
+
+}
+
+enum PlanType {
+  development
+  hosting
+  bundle
+}
+
+enum Role {
+  superadmin
+  support
+}
