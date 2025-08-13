@@ -78,7 +78,7 @@ export const signIn = async (req: Request, res: Response) => {
 
     // Return user info only (no token in body)
     return res.status(201).json({
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { id: user.id, email: user.email, name: user.name, role: user.role },
     });
   } catch (error) {
     console.error("Signin error:", error);
@@ -91,6 +91,8 @@ export const signIn = async (req: Request, res: Response) => {
 export const verifyCookie = async (req: Request, res: Response) => {
   try {
     // Get token from cookie instead of header
+
+    console.log("Verify Token Called");
     const token = req.cookies?.accessToken;
     if (!token) {
       return res.status(401).json({ error: "Authorization token missing" });
@@ -110,5 +112,27 @@ export const verifyCookie = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Token expired" });
     }
     return res.status(401).json({ error: "Invalid token" });
+  }
+};
+
+
+//signout
+
+
+export const signOut = async (req: Request, res: Response) => {
+  console.log("Api called");
+  try {
+
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/", // must match the path used when setting the cookie
+    });
+
+    return res.status(200).json({ message: "Signed out successfully" });
+  } catch (error) {
+    console.error("Signout error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
