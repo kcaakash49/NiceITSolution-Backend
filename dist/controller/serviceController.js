@@ -3,6 +3,7 @@ import prisma from "../db/db.js";
 import { createPlanSchema } from "../validators/servicePlan.js";
 // Adding Parent Services
 export const addService = async (req, res) => {
+    console.log(req.body);
     const parsed = createServiceProductSchema.safeParse(req.body);
     if (!parsed.success) {
         return res.status(400).json({ message: "Validation failed", errors: parsed.error.issues });
@@ -11,7 +12,7 @@ export const addService = async (req, res) => {
         const product = await prisma.serviceProduct.create({
             data: parsed.data,
         });
-        res.status(201).json(product);
+        res.status(201).json({ product, message: "Successfully Created" });
     }
     catch (err) {
         res.status(500).json({ message: "Server error", error: err.message });
@@ -24,7 +25,7 @@ export const getService = async (req, res) => {
             where: { isActive: true },
             orderBy: { createdAt: "desc" },
             include: {
-                Plan: true, // Optional: include plans if needed
+                Plan: false, // Optional: include plans if needed
             },
         });
         res.status(200).json(products);

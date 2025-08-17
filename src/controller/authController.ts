@@ -136,3 +136,59 @@ export const signOut = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+
+
+
+// export const signup2 = async (req: Request, res: Response) => {
+//   const result = SignUpSchema.safeParse(req.body);
+//   if (!result.success) {
+//     return res.status(400).json({ error: result.error.issues });
+//   }
+
+//   const { email, password, name, role } = result.data;
+
+//   try {
+//     const response = await prisma.$transaction(async (tx: P) => {
+//       // Check if user already exists
+//       const existing = await tx.adminUser.findUnique({ where: { email } });
+//       if (existing) {
+//         throw new Error('User already exists');
+//       }
+
+//       const hashed = await hashPassword(password);
+
+//       // Create the user
+//       const user = await tx.adminUser.create({
+//         data: { email, passwordHash: hashed, name, role },
+//       });
+
+//       // Generate token (non-db operation)
+//       const token = generateToken({
+//         userId: user.id,
+//         email: user.email,
+//         role: user.role,
+//         name: user.name,
+//       });
+
+//       return { token, user };
+//     });
+
+//     const { token, user } = response;
+
+//     return res.status(201).json({
+//       token,
+//       user: { id: user.id, email: user.email, name: user.name },
+//     });
+
+//   } catch (error: any) {
+//     console.error('Signup error:', error);
+
+//     if (error.message === 'User already exists') {
+//       return res.status(409).json({ error: error.message });
+//     }
+
+//     return res.status(500).json({ error: 'Internal server error' });
+//   }
+// };

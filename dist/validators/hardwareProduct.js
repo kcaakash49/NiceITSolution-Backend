@@ -7,4 +7,5 @@ export const createHardwareProductSchema = z.object({
     price: z.number().positive("Price must be a positive number").optional(),
     stock: z.number().int().nonnegative().optional(),
     isActive: z.boolean().optional(),
+    length: z.number().optional()
 });

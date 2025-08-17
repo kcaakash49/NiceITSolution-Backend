@@ -6,8 +6,8 @@ import { checkAuthentication } from "../middleware/checkAuthentication.js";
 
 const ftthRouter = Router();
 
-ftthRouter.post("add-product",checkAuthentication, addProduct);
-ftthRouter.get("get-product",getProduct);
+ftthRouter.post("/add-product",checkAuthentication, addProduct);
+ftthRouter.get("/get-product",getProduct);
 
 
 export default ftthRouter;

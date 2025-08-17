@@ -6,6 +6,7 @@ import { PlanType } from "@prisma/client";
 
 // Adding Parent Services
 export const addService = async(req: Request, res: Response) => {
+    console.log(req.body);
     const parsed = createServiceProductSchema.safeParse(req.body);
 
   if (!parsed.success) {
@@ -16,7 +17,7 @@ export const addService = async(req: Request, res: Response) => {
     const product = await prisma.serviceProduct.create({
       data: parsed.data,
     });
-    res.status(201).json(product);
+    res.status(201).json({product, message: "Successfully Created"});
   } catch (err: any) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
@@ -29,7 +30,7 @@ export const getService = async(req: Request, res: Response) => {
           where: { isActive: true },
           orderBy: { createdAt: "desc" },
           include: {
-            Plan: true, // Optional: include plans if needed
+            Plan: false, // Optional: include plans if needed
           },
         });
         res.status(200).json(products);

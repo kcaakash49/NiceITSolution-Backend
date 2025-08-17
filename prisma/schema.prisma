@@ -16,7 +16,6 @@ model AdminUser {
   passwordHash String
   createdAt    DateTime @default(now())
   serviceInquiryHandled ServiceInquiry[]
-  planHandled   Plan[]
   hardwareInquiryHandled  HardwareInquiry[]
 }
 
@@ -90,12 +89,10 @@ model Plan {
   isActive         Boolean        @default(true)
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
-  Inquiry          ServiceInquiry[]
-  isHandled        Boolean @default(false)
-  handledBy        AdminUser?   @relation(fields: [handledById], references: [id])
-  handledById  String?
   serviceProduct   ServiceProduct @relation(fields: [productId], references: [id])
+  inquiries        ServiceInquiry[] // inquiries that selected this plan
 }
+
 
 model ServiceProduct {
   id          String    @id @default(uuid())
