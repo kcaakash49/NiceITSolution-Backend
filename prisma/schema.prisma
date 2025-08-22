@@ -54,6 +54,7 @@ model HardwareProduct {
 model HardwareCategory {
   id        String           @id @default(uuid())
   name      String           @unique
+  isLengthNeeded Boolean     @default(true)
   products  HardwareProduct[]
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt

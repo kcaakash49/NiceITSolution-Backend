@@ -42,8 +42,10 @@ export const getService = async(req: Request, res: Response) => {
 // Adding Plans
 
 export const addPlan = async(req: Request, res: Response) => {
+    console.log(req.body);
+    console.log("Entered Add plan");
     const parsed = createPlanSchema.safeParse(req.body);
-
+    console.log("Parsed Data", parsed);
   if (!parsed.success) {
     return res.status(400).json({ message: "Validation failed", errors: parsed.error.issues });
   }

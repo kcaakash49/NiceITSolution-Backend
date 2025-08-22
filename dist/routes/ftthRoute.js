@@ -1,7 +1,10 @@
 import { Router } from "express";
-import { addProduct, getProduct } from "../controller/ftthController.js";
+import { addCategory, addProduct, deleteCategory, getCategory, getProduct } from "../controller/ftthController.js";
 import { checkAuthentication } from "../middleware/checkAuthentication.js";
 const ftthRouter = Router();
 ftthRouter.post("/add-product", checkAuthentication, addProduct);
 ftthRouter.get("/get-product", getProduct);
+ftthRouter.post("/add-category", checkAuthentication, addCategory);
+ftthRouter.get("/get-categories", getCategory);
+ftthRouter.post("/delete-category", checkAuthentication, deleteCategory);
 export default ftthRouter;
