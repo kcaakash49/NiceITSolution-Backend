@@ -1,6 +1,6 @@
-import { createServiceProductSchema } from "../validators/serviceProducts.js";
+// import { createServiceProductSchema } from "../validators/serviceProducts.js";
 import prisma from "../db/db.js";
-import { createPlanSchema } from "../validators/servicePlan.js";
+import { createPlanSchema, createServiceProductSchema } from "@kcaakash/validators";
 // Adding Parent Services
 export const addService = async (req, res) => {
     console.log(req.body);

@@ -116,9 +116,10 @@ enum InquiryStatus {
 }
 
 enum PlanType {
-  development
-  hosting
-  bundle
+  starter
+  professional
+  premium
+  enterprise
 }
 
 enum Role {

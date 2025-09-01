@@ -1,15 +1,16 @@
 import { Request, Response } from "express";
-import { SignInSchema, SignUpSchema } from "../validators/auth.js";
+// import { SignInSchema, SignUpSchema } from "../validators/auth.js";
 import prisma from "../db/db.js";
 import { generateToken, verifyToken } from "../utils/jwt.js";
 import { comparePassword, hashPassword } from "../utils/hash.js";
 import jwt from "jsonwebtoken";
+import { signInSchema, signUpSchema } from "@kcaakash/validators";
 
 
 //Signup Controller
 export const signup = async (req: Request, res: Response) => {
   try {
-    const result = SignUpSchema.safeParse(req.body);
+    const result = signUpSchema.safeParse(req.body);
     if (!result.success) {
       return res.status(400).json({ error: result.error.issues });
     }
@@ -48,7 +49,7 @@ export const signup = async (req: Request, res: Response) => {
 //Login Controller
 export const signIn = async (req: Request, res: Response) => {
   try {
-    const result = SignInSchema.safeParse(req.body);
+    const result = signInSchema.safeParse(req.body);
     if (!result.success) {
       return res.status(400).json({ error: result.error.issues });
     }

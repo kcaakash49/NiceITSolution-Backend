@@ -1,5 +1,6 @@
-import { createHardwareProductSchema } from "../validators/hardwareProduct.js";
+// import { createHardwareProductSchema } from "../validators/hardwareProduct.js";
 import prisma from "../db/db.js";
+import { createHardwareProductSchema } from "@kcaakash/validators";
 //Posting FTTH Product API
 export const addProduct = async (req, res) => {
     const parsed = createHardwareProductSchema.safeParse(req.body);
