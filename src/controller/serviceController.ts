@@ -5,9 +5,10 @@ import prisma from "../db/db.js";
 import { PlanType } from "@prisma/client";
 import { createPlanSchema, createServiceProductSchema } from "@kcaakash/validators";
 
+
 // Adding Parent Services
 export const addService = async(req: Request, res: Response) => {
-    console.log(req.body);
+    
     const parsed = createServiceProductSchema.safeParse(req.body);
 
   if (!parsed.success) {
@@ -16,7 +17,11 @@ export const addService = async(req: Request, res: Response) => {
 
   try {
     const product = await prisma.serviceProduct.create({
-      data: parsed.data,
+      data: {
+        ...parsed.data,
+        addedById: req.userId
+      },
+
     });
     res.status(201).json({product, message: "Successfully Created"});
   } catch (err: any) {
@@ -54,7 +59,8 @@ export const addPlan = async(req: Request, res: Response) => {
   try {
     const plan = await prisma.plan.create({
       data: {
-        ...parsed.data, type: parsed.data.type as PlanType
+        ...parsed.data,
+        addedById: req.userId
       },
     });
 

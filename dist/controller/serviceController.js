@@ -3,14 +3,16 @@ import prisma from "../db/db.js";
 import { createPlanSchema, createServiceProductSchema } from "@kcaakash/validators";
 // Adding Parent Services
 export const addService = async (req, res) => {
-    console.log(req.body);
     const parsed = createServiceProductSchema.safeParse(req.body);
     if (!parsed.success) {
         return res.status(400).json({ message: "Validation failed", errors: parsed.error.issues });
     }
     try {
         const product = await prisma.serviceProduct.create({
-            data: parsed.data,
+            data: {
+                ...parsed.data,
+                addedById: req.userId
+            },
         });
         res.status(201).json({ product, message: "Successfully Created" });
     }
@@ -46,7 +48,8 @@ export const addPlan = async (req, res) => {
     try {
         const plan = await prisma.plan.create({
             data: {
-                ...parsed.data, type: parsed.data.type
+                ...parsed.data,
+                addedById: req.userId
             },
         });
         return res.status(201).json(plan);

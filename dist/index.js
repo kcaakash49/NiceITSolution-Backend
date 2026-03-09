@@ -5,6 +5,7 @@ import ftthRouter from "./routes/ftthRoute.js";
 import authRouter from './routes/authRoute.js';
 import cors from 'cors';
 import cookieParser from "cookie-parser";
+import mailRouter from './routes/mailRoute.js';
 dotenv.config();
 const PORT = process.env.PORT || 4000;
 const app = express();
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use("/service", serviceRouter);
 app.use("/ftth", ftthRouter);
 app.use('/auth', authRouter);
+app.use('/mail', mailRouter);
 app.listen(PORT, () => {
     console.log(`Server running at ${PORT}`);
 });

@@ -2,12 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt.js"; // adjust import path
 import jwt from "jsonwebtoken";
 
-interface AuthenticatedRequest extends Request {
-  userId?: string;
-}
+// interface AuthenticatedRequest extends Request {
+//   userId: string;
+// }
 
 export const checkAuthentication = (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {

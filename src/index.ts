@@ -6,6 +6,7 @@ import ftthRouter from "./routes/ftthRoute.js";
 import authRouter from './routes/authRoute.js';
 import cors from 'cors';
 import cookieParser from "cookie-parser";
+import mailRouter from './routes/mailRoute.js';
 
 
 dotenv.config();
@@ -26,6 +27,7 @@ app.use(express.json());
 app.use("/service", serviceRouter);
 app.use ("/ftth", ftthRouter);
 app.use('/auth', authRouter);
+app.use('/mail', mailRouter);
 
 
 app.listen(PORT, () => {

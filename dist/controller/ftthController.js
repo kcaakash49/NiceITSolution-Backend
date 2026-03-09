@@ -11,7 +11,10 @@ export const addProduct = async (req, res) => {
     }
     try {
         const product = await prisma.hardwareProduct.create({
-            data: parsed.data,
+            data: {
+                ...parsed.data,
+                addedById: req.userId
+            },
         });
         return res.status(201).json(product);
     }
@@ -37,7 +40,7 @@ export const getProduct = async (req, res) => {
 //add Category
 export const addCategory = async (req, res) => {
     try {
-        const { name, isLengthNeeded } = req.body;
+        const { name, isLengthNeeded, imageUrl } = req.body;
         const ifCategoryExistAlready = await prisma.hardwareCategory.findUnique({
             where: {
                 name: name
@@ -48,7 +51,7 @@ export const addCategory = async (req, res) => {
         }
         const category = await prisma.hardwareCategory.create({
             data: {
-                name, isLengthNeeded
+                name, isLengthNeeded, imageUrl
             }
         });
         return res.status(200).json({ message: "Category Added Successfully", category });

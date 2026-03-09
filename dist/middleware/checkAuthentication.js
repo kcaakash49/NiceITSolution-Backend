@@ -1,5 +1,8 @@
 import { verifyToken } from "../utils/jwt.js"; // adjust import path
 import jwt from "jsonwebtoken";
+// interface AuthenticatedRequest extends Request {
+//   userId: string;
+// }
 export const checkAuthentication = (req, res, next) => {
     try {
         // Get token from cookie instead of header

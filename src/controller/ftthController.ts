@@ -3,10 +3,14 @@ import { Request, Response } from "express";
 import prisma from "../db/db.js";
 import { createHardwareProductSchema } from "@kcaakash/validators";
 
+
+
+
 //Posting FTTH Product API
 export const addProduct = async (req: Request, res: Response) => {
+  
   const parsed = createHardwareProductSchema.safeParse(req.body);
-
+  
   if (!parsed.success) {
     return res
       .status(400)
@@ -15,7 +19,11 @@ export const addProduct = async (req: Request, res: Response) => {
 
   try {
     const product = await prisma.hardwareProduct.create({
-      data: parsed.data,
+      data: {
+        ...parsed.data,
+        addedById: req.userId
+      },
+    
     });
 
     return res.status(201).json(product);
@@ -45,7 +53,7 @@ export const getProduct = async (req: Request, res: Response) => {
 
 export const addCategory = async (req: Request, res: Response) => {
   try {
-    const { name, isLengthNeeded } = req.body;
+    const { name, isLengthNeeded, imageUrl } = req.body;
     const ifCategoryExistAlready = await prisma.hardwareCategory.findUnique({
       where: {
         name: name
@@ -58,7 +66,7 @@ export const addCategory = async (req: Request, res: Response) => {
 
     const category = await prisma.hardwareCategory.create({
       data: {
-        name, isLengthNeeded
+        name, isLengthNeeded, imageUrl
         
       }
     })
