@@ -6,7 +6,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-    console.log("Seeding admin user...");
+    
     // Change these values as needed
     const adminEmail = "test@gmail.com";
     const adminPassword = "test@123";
