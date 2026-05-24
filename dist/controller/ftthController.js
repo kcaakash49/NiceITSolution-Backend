@@ -40,6 +40,7 @@ export const getProduct = async (req, res) => {
 //add Category
 export const addCategory = async (req, res) => {
     try {
+        console.log(req.body);
         const { name, isLengthNeeded, imageUrl } = req.body;
         const ifCategoryExistAlready = await prisma.hardwareCategory.findUnique({
             where: {

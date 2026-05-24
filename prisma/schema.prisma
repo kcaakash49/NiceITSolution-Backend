@@ -8,7 +8,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model AdminUser {
+model User {
   id                     String            @id @default(uuid())
   email                  String            @unique
   name                   String
@@ -31,7 +31,7 @@ model HardwareInquiry {
   quantity        Int
   message         String
   status          InquiryStatus   @default(new)
-  handledBy       AdminUser?      @relation(fields: [handledById], references: [id])
+  handledBy       User?      @relation(fields: [handledById], references: [id])
   handledById     String?
   isHandled       Boolean         @default(false)
   createdAt       DateTime        @default(now())
@@ -48,7 +48,7 @@ model HardwareProduct {
   price           Float?
   stock           Int?
   length          Int?
-  addedBy         AdminUser         @relation(fields: [addedById], references: [id])
+  addedBy         User         @relation(fields: [addedById], references: [id])
   addedById       String
   isActive        Boolean           @default(true)
   createdAt       DateTime          @default(now())
@@ -59,7 +59,7 @@ model HardwareProduct {
 model HardwareCategory {
   id             String            @id @default(uuid())
   name           String            @unique
-  isLengthNeeded Boolean           @default(true)
+  isLengthNeeded Boolean           @default(false)
   products       HardwareProduct[]
   imageUrl          String
   createdAt      DateTime          @default(now())
@@ -75,7 +75,7 @@ model ServiceInquiry {
   selectedPlanId String?
   message        String
   status         InquiryStatus  @default(new)
-  handledBy      AdminUser?     @relation(fields: [handledById], references: [id])
+  handledBy      User?     @relation(fields: [handledById], references: [id])
   handledById    String?
   isHandled      Boolean        @default(false)
   createdAt      DateTime       @default(now())
@@ -92,7 +92,7 @@ model Plan {
   priceMonthly     Float?
   priceOneTime     Float?
   features         String[]
-  addedBy          AdminUser        @relation(fields: [addedById], references: [id])
+  addedBy          User        @relation(fields: [addedById], references: [id])
   addedById        String
   contractDuration Int?
   isActive         Boolean          @default(true)
@@ -109,7 +109,7 @@ model ServiceProduct {
   isActive    Boolean          @default(true)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
-  addedBy     AdminUser        @relation(fields: [addedById], references: [id])
+  addedBy     User        @relation(fields: [addedById], references: [id])
   addedById   String
   inquiry     ServiceInquiry[]
   Plan        Plan[]
@@ -131,6 +131,332 @@ enum PlanType {
 }
 
 enum Role {
-  superadmin
-  support
+  SUPER_ADMIN
+  ADMIN
+  INVENTORY_MANAGER
+  SALES
+  ACCOUNTANT
+  VIEWER
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  DISCONTINUED
+}
+
+enum PurchaseStatus {
+  DRAFT
+  ORDERED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  COMPLETED
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  FINALIZED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+enum PaymentMethod {
+  CASH
+  ONLINE
+  CHEQUE
+}
+
+enum MovementType {
+  PURCHASE_IN
+  SALE_OUT
+  TRANSFER_IN
+  TRANSFER_OUT
+  RETURN_IN
+  WARRANTY_OUT
+  DAMAGE_OUT
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+}
+
+enum WarrantyStatus {
+  SUBMITTED
+  CHECKING
+  APPROVED
+  SENT_TO_SUPPLIER
+  REPLACED
+  REJECTED
+  RESOLVED
+}
+
+
+model Warehouse {
+  id        String   @id @default(cuid())
+  name      String
+  location  String?
+  batches   ProductBatch[]
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id          String   @id @default(cuid())
+
+  name        String
+  sku         String?  @unique
+
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  brand       String?
+
+  status      ProductStatus @default(ACTIVE)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  batches     ProductBatch[]
+}
+
+model ProductBatch {
+  id            String   @id @default(cuid())
+  batchCode     String   @unique
+
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id])
+
+  warehouseId   String
+  warehouse     Warehouse @relation(fields: [warehouseId], references: [id])
+
+  quantityIn    Int
+  quantityOut   Int      @default(0)
+  damagedQty    Int      @default(0)
+
+  purchasePrice Decimal  @db.Decimal(18, 2)
+
+  supplierId    String?
+
+  createdAt     DateTime @default(now())
+
+  movements     StockMovement[]
+  saleItems      SaleItemBatch[]
+}
+
+model InventoryBalance {
+  id          String  @id @default(cuid())
+
+  productId   String
+  warehouseId String
+
+  available   Int
+  reserved    Int     @default(0)
+  damaged     Int     @default(0)
+
+  updatedAt   DateTime @updatedAt
+
+  @@unique([productId, warehouseId])
+}
+
+model StockMovement {
+  id          String        @id @default(cuid())
+
+  productId   String
+  batchId     String?
+
+  warehouseId String
+
+  type        MovementType
+
+  quantity    Int
+
+  referenceId String? // invoice, purchase, transfer etc
+
+  createdAt   DateTime @default(now())
+
+  batch       ProductBatch? @relation(fields: [batchId], references: [id])
+}
+
+model Purchase {
+  id            String @id @default(cuid())
+
+  purchaseCode  String @unique
+  supplierId    String
+
+  status        PurchaseStatus @default(DRAFT)
+
+  totalAmount   Decimal @db.Decimal(18,2)
+
+  createdAt     DateTime @default(now())
+
+  items         PurchaseItem[]
+
+}
+
+model PurchaseItem {
+  id          String  @id @default(cuid())
+
+  purchaseId  String
+  purchase     Purchase @relation(fields: [purchaseId], references: [id])
+
+  productId   String
+
+
+  quantity    Int
+  unitPrice   Decimal @db.Decimal(18, 2)
+}
+
+model Sale {
+  id           String @id @default(cuid())
+
+  invoiceNo    String @unique
+
+  customerId   String
+
+  status       InvoiceStatus @default(DRAFT)
+
+  totalAmount  Decimal @db.Decimal(18,2)
+  paidAmount   Decimal @db.Decimal(18,2) @default(0)
+  dueAmount    Decimal @db.Decimal(18,2) @default(0)
+
+  vatEnabled   Boolean @default(false)
+
+  createdAt    DateTime @default(now())
+  finalizedAt  DateTime?
+
+  items        SaleItem[]
+  payments     Payment[]
+
+}
+
+model SaleItem {
+  id          String  @id @default(cuid())
+
+  saleId      String
+  sale       Sale @relation(fields: [saleId], references: [id])
+
+  productId   String
+
+  quantity    Int
+
+  unitPrice   Decimal @db.Decimal(18, 2)
+
+  vatType     String?  // VAT_13 / EXEMPT / NULL
+  vatAmount   Decimal  @db.Decimal(18, 2) @default(0)
+
+  batchAllocations SaleItemBatch[]
+}
+
+model SaleItemBatch {
+  id          String @id @default(cuid())
+
+  saleItemId  String
+  saleItem    SaleItem @relation(fields: [saleItemId], references: [id])
+
+  batchId     String
+  batch       ProductBatch @relation(fields: [batchId], references: [id])
+
+  quantity    Int
+
+}
+
+model Payment {
+  id          String @id @default(cuid())
+
+  saleId      String
+  sale        Sale @relation(fields: [saleId], references: [id])
+
+  amount      Decimal @db.Decimal(18, 2)
+
+  method      PaymentMethod
+  status      PaymentStatus @default(PENDING)
+
+  receivedAt  DateTime?
+
+  createdAt   DateTime @default(now())
+}
+
+model Transfer {
+  id            String @id @default(cuid())
+
+  fromWarehouseId String
+  toWarehouseId   String
+
+  status        String
+
+  createdAt     DateTime @default(now())
+}
+
+model Expense {
+  id          String @id @default(cuid())
+
+  type        String // TRANSPORT / LABOUR / etc
+
+  amount      Decimal @db.Decimal(18, 2)
+
+  description String?
+
+  createdAt   DateTime @default(now())
+}
+
+model DailySnapshot {
+  id          String @id @default(cuid())
+
+  date        DateTime @unique
+
+  totalSales  Decimal @db.Decimal(18, 2)
+  totalPaid   Decimal @db.Decimal(18, 2)
+  totalDue    Decimal @db.Decimal(18, 2)
+
+  totalExpense Decimal @db.Decimal(18, 2)
+
+  createdAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id        String @id @default(cuid())
+
+  userId    String?
+
+  action    String
+  entity    String
+  entityId  String?
+
+  meta      Json?
+
+  createdAt DateTime @default(now())
+}
+
+model File {
+  id        String   @id @default(cuid())
+
+  url       String
+  name      String?
+  type      String?  // image/pdf/video
+  size      Int?
+
+  entityType String? // Product, Sale, Purchase, Category
+  entityId   String?
+
+  createdAt DateTime @default(now())
+  @@index([entityType, entityId])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+
+  image     String?
+  products    Product[]
+  parentId  String?
+  parent    Category? @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+
+  createdAt DateTime @default(now())
 }
