@@ -4,7 +4,9 @@ import prisma from "../db/db.js";
 import { generateToken, verifyToken } from "../utils/jwt.js";
 import { comparePassword, hashPassword } from "../utils/hash.js";
 import jwt from "jsonwebtoken";
-import { signInSchema, signUpSchema } from "@kcaakash/validators";
+import { Role } from "@prisma/client";
+import { signInSchema, signUpSchema } from "../validators/auth.js";
+
 
 
 //Signup Controller
@@ -17,13 +19,13 @@ export const signup = async (req: Request, res: Response) => {
 
     const { email, password, name, role } = result.data;
 
-    const existing = await prisma.adminUser.findUnique({ where: { email } });
+    const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       return res.status(409).json({ error: "User already exists" });
     }
 
     const hashed = await hashPassword(password);
-    const user = await prisma.adminUser.create({
+    const user = await prisma.user.create({
       data: { email, passwordHash: hashed, name, role },
     });
 
@@ -56,7 +58,7 @@ export const signIn = async (req: Request, res: Response) => {
 
     const { email, password } = result.data;
 
-    const user = await prisma.adminUser.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user || !(await comparePassword(password, user.passwordHash))) {
       return res.status(401).json({ error: "Invalid credentials" });
     }

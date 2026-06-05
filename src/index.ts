@@ -7,6 +7,8 @@ import authRouter from './routes/authRoute.js';
 import cors from 'cors';
 import cookieParser from "cookie-parser";
 import mailRouter from './routes/mailRoute.js';
+import categoryRouter from './modules/category/category.route.js';
+import productRouter from './modules/product/product.route.js';
 
 
 dotenv.config();
@@ -29,6 +31,8 @@ app.use ("/ftth", ftthRouter);
 app.use('/auth', authRouter);
 app.use('/mail', mailRouter);
 
+app.use("/categories", categoryRouter);
+app.use("/products", productRouter);
 
 app.listen(PORT, () => {
     console.log(`Server running at ${PORT}`);

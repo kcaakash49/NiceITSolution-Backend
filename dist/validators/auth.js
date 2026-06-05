@@ -1,5 +1,6 @@
+import { Role } from "@prisma/client";
 import { z } from "zod";
-export const SignUpSchema = z.object({
+export const signUpSchema = z.object({
     name: z
         .string()
         .min(2, "Name must be at least 2 characters")
@@ -11,9 +12,9 @@ export const SignUpSchema = z.object({
         .string()
         .min(6, "Password must be at least 6 characters")
         .max(100, "Password must be at most 100 characters"),
-    role: z.enum(["superadmin", "support"]),
+    role: z.nativeEnum(Role)
 });
-export const SignInSchema = z.object({
+export const signInSchema = z.object({
     email: z.string().email(),
     password: z.string().min(6),
 });
